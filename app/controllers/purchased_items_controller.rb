@@ -16,11 +16,20 @@ class PurchasedItemsController < ApplicationController
   # POST /purchased_items
   def create
     @purchased_item = PurchasedItem.new(purchased_item_params)
+    @found_widget = Widget.find(@purchased_item.widget_id)
 
-    if @purchased_item.save
-      render json: @purchased_item, status: :created, location: @purchased_item
+    if !@found_widget || @found_widget.quantity === 0
+      if !@found_widget
+        raise "No widget found"
+      elsif @found_widget.quantity === 0
+        raise "0 quantity left"
+      end
     else
-      render json: @purchased_item.errors, status: :unprocessable_entity
+      if @purchased_item.save
+        render json: @purchased_item, status: :created, location: @purchased_item
+      else
+        render json: @purchased_item.errors, status: :unprocessable_entity
+      end
     end
   end
 
